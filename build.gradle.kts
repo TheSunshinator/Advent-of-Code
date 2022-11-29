@@ -17,3 +17,9 @@ tasks {
         gradleVersion = "7.5.1"
     }
 }
+
+dependencies {
+    implementation("io.arrow-kt:arrow-core:1.1.2")
+    implementation("io.kotest:kotest-assertions-core:5.5.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+}
