@@ -5,7 +5,7 @@ import java.security.MessageDigest
 /**
  * Reads lines from the given input txt file.
  */
-fun readInput(name: String) = File("src", "$name.txt").readLines()
+fun readInput(day: String, name: String): List<String> = File("src/day$day", "$name.txt").readLines()
 
 /**
  * Converts string to md5 hash.
@@ -43,7 +43,7 @@ fun <T> List<List<T>>.getOrElse(p: Point, defaultValue: (Point) -> T) : T {
 
 infix fun Int.iterateTo(other: Int) = if (this <= other) rangeTo(other) else downTo(other)
 
-fun parseIntSequence(input: List<String>) = input.first().splitToSequence(",").map(String::toInt)
+fun parseLongSequence(input: List<String>) = input.first().splitToSequence(",").map(String::toLong)
 
 fun <T> List<List<T>>.coordinates() = indices.asSequence().flatMap { i -> this[i].indices.map { j -> Point(i, j) } }
 infix fun IntRange.cartesianProduct(other: IntRange) = asSequence().flatMap { i -> other.map { j -> Point(i, j) } }
