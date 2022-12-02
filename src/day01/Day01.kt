@@ -29,7 +29,7 @@ fun main() {
         .let(::println)
 }
 
-fun List<String>.caloriesPerElf(): List<Long> {
+private fun List<String>.caloriesPerElf(): List<Long> {
     return asSequence()
         .map(String::toLongOrNull)
         .fold(mutableListOf(0L)) { accumulator, number ->
