@@ -1,6 +1,15 @@
-package day07
+package day07.arrow
 
+import arrow.core.foldMap
+import arrow.core.toOption
+import arrow.optics.Fold
+import arrow.optics.Getter
+import arrow.optics.Optional
+import arrow.optics.optics
+import arrow.typeclasses.Monoid
+import day07.folder
 import io.kotest.matchers.shouldBe
+import java.lang.Long.min
 import readInput
 
 fun main() {
@@ -10,28 +19,26 @@ fun main() {
     val testFileSystem = buildFileSystem(testInput)
     val realFileSystem = buildFileSystem(realInput)
 
-    testFileSystem.asSequence()
-        .filter { it.size <= 100000 }
-        .sumOf { it.size }
+    Fold.system().folder.size
+        .filter { it <= 100000 }
+        .fold(Monoid.long(), testFileSystem)
         .also(::println) shouldBe 95437
 
-    realFileSystem.asSequence()
-        .filter { it.size <= 100000 }
-        .sumOf { it.size }
+    Fold.system().folder.size
+        .filter { it <= 100000 }
+        .fold(Monoid.long(), realFileSystem)
         .let(::println)
 
     val testSpaceToFree = testFileSystem.size - 40_000_000
-    testFileSystem.asSequence()
-        .sortedBy { it.size }
-        .first { it.size >= testSpaceToFree }
-        .size
+    Fold.system().folder.size
+        .filter { it >= testSpaceToFree }
+        .fold(Monoid.min, testFileSystem)
         .also(::println) shouldBe 24933642
 
     val realSpaceToFree = realFileSystem.size - 40_000_000
-    realFileSystem.asSequence()
-        .sortedBy { it.size }
-        .first { it.size >= realSpaceToFree }
-        .size
+    Fold.system().folder.size
+        .filter { it >= realSpaceToFree }
+        .fold(Monoid.min, realFileSystem)
         .let(::println)
 }
 
@@ -57,23 +64,30 @@ private val changeDirectoryRegex = "\\A\\$ cd (.+)\\z".toRegex()
 private val directoryListRegex = "\\Adir (.+)\\z".toRegex()
 private val fileListRegex = "\\A(\\d+) (.+)\\z".toRegex()
 
-private sealed interface System {
+@optics
+sealed interface System {
     val name: String
     val size: Long
+
+    companion object
 }
 
-private class File(
+@optics
+data class File(
     override val name: String,
     override val size: Long,
-): System {
+) : System {
     override fun equals(other: Any?): Boolean = other is File && other.name == name
     override fun hashCode(): Int = name.hashCode()
+
+    companion object
 }
 
-private class Folder(
+@optics
+data class Folder(
     override val name: String,
     val parent: Folder?,
-): System, Iterable<System> {
+) : System, Iterable<System> {
     val content = mutableSetOf<System>()
     override val size: Long by lazy { content.sumOf { it.size } }
     operator fun plus(part: System): Folder = apply { content.add(part) }
@@ -83,6 +97,32 @@ private class Folder(
             content.flatMap { system -> system.let { it as? Folder }?.asSequence().orEmpty() }
         )
     }
+
     override fun equals(other: Any?): Boolean = other is File && other.name == name
     override fun hashCode(): Int = name.hashCode()
+
+    companion object
 }
+
+private fun Fold.Companion.system(): Fold<System, System> = object : Fold<System, System> {
+    override fun <R> foldMap(M: Monoid<R>, source: System, map: (focus: System) -> R): R = when (source) {
+        is File -> map(source)
+        is Folder -> source.asSequence().foldMap(M, map)
+    }
+}
+
+private inline val Fold<System, Folder>.size: Fold<System, Long>
+    inline get() = plus(Getter { it.size })
+
+private inline fun Fold<System, Long>.filter(crossinline predicate: (Long) -> Boolean) = plus(
+    Optional(
+        getOption = { source -> source.takeIf(predicate).toOption() },
+        set = { _, focus -> focus }
+    )
+)
+
+private inline val Monoid.Companion.min: Monoid<Long>
+    get() = object : Monoid<Long> {
+        override fun empty(): Long = Long.MAX_VALUE
+        override fun Long.combine(b: Long): Long = min(this, b)
+    }
