@@ -1,7 +1,7 @@
 package day04
 
 import io.kotest.matchers.shouldBe
-import readInput
+import utils.readInput
 
 fun main() {
     val testInput = readInput("04", "test_input")

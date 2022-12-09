@@ -1,10 +1,10 @@
 package day08
 
-import Point
-import coordinates
-import get
+import utils.Point
+import utils.coordinates
+import utils.get
 import io.kotest.matchers.shouldBe
-import readInput
+import utils.readInput
 
 fun main() {
     val testInput = readInput("08", "test_input").map { it.toList() }

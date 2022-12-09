@@ -2,7 +2,7 @@ package day05
 
 import arrow.core.identity
 import io.kotest.matchers.shouldBe
-import readInput
+import utils.readInput
 
 fun main() {
     val testInput = readInput("05", "test_input")

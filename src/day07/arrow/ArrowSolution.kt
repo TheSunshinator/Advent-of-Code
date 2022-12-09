@@ -9,7 +9,7 @@ import arrow.optics.optics
 import arrow.typeclasses.Monoid
 import io.kotest.matchers.shouldBe
 import java.lang.Long.min
-import readInput
+import utils.readInput
 
 fun main() {
     val testInput = readInput("07", "test_input")
