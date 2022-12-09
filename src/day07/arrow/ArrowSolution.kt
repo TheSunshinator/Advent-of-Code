@@ -7,7 +7,6 @@ import arrow.optics.Getter
 import arrow.optics.Optional
 import arrow.optics.optics
 import arrow.typeclasses.Monoid
-import day07.folder
 import io.kotest.matchers.shouldBe
 import java.lang.Long.min
 import readInput
