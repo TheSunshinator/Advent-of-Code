@@ -55,3 +55,5 @@ fun parseLongSequence(input: List<String>) = input.first().splitToSequence(",").
 
 fun <T> List<List<T>>.coordinates() = indices.asSequence().flatMap { i -> this[i].indices.map { j -> Point(i, j) } }
 infix fun IntRange.cartesianProduct(other: IntRange) = asSequence().flatMap { i -> other.map { j -> Point(i, j) } }
+
+fun Int.plusOrMinus1() = minus(1)..plus(1)
