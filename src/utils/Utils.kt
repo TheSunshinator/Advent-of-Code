@@ -1,6 +1,5 @@
 package utils
 
-import arrow.optics.optics
 import java.io.File
 import java.math.BigInteger
 import java.security.MessageDigest
@@ -17,37 +16,6 @@ fun String.md5(): String = BigInteger(1, MessageDigest.getInstance("MD5").digest
 
 inline fun <T, U, V> Pair<T, U>.mapFirst(transform: (T) -> V) = transform(first) to second
 inline fun <T, U, V> Pair<T, U>.mapSecond(transform: (U) -> V) = first to transform(second)
-
-@optics
-data class Point(val x: Int, val y: Int) {
-
-    constructor(): this(0, 0)
-    fun neighbors(
-        includeThis: Boolean = false,
-        includeDiagonal: Boolean = false,
-    ) = sequence {
-        if (includeDiagonal) yield(Point(x - 1, y - 1))
-        yield(Point(x, y - 1))
-        if (includeDiagonal) yield(Point(x + 1, y - 1))
-        yield(Point(x - 1, y))
-        if (includeThis) yield(this@Point)
-        yield(Point(x + 1, y))
-        if (includeDiagonal) yield(Point(x - 1, y + 1))
-        yield(Point(x, y + 1))
-        if (includeDiagonal) yield(Point(x + 1, y + 1))
-    }
-
-    companion object
-}
-
-operator fun <T> List<List<T>>.get(p: Point) = this[p.x][p.y]
-operator fun <T> List<MutableList<T>>.set(p: Point, value: T) {
-    this[p.x][p.y] = value
-}
-fun <T> List<List<T>>.getOrElse(p: Point, defaultValue: (Point) -> T) : T {
-    return if (p.x in indices && p.y in this[p.x].indices) this[p]
-    else defaultValue(p)
-}
 
 infix fun Int.iterateTo(other: Int) = if (this <= other) rangeTo(other) else downTo(other)
 
