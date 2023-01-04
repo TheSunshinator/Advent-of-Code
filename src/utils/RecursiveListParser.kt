@@ -1,64 +1,20 @@
 package utils
 
+import com.google.gson.Gson
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
+
 fun <T> parseRecursiveList(
     input: String,
-    startIndex: Int = 0,
-    elementParsing: (String) -> T,
-): RecursiveList<T> = parseRecursiveListInternal(IndexedValue(startIndex, input), elementParsing).value
-
-private fun <T> parseRecursiveListInternal(
-    input: IndexedValue<String>,
-    elementParsing: (String) -> T,
-): IndexedValue<RecursiveList<T>> {
-    return when {
-        input.currentCharacter != '[' -> input.value.asSequence()
-            .drop(input.index)
-            .takeWhile { it != ',' && it != ']' }
-            .joinToString(separator = "")
-            .let {
-                IndexedValue(
-                    index = input.index + it.length,
-                    value = RecursiveList.Element(elementParsing(it)),
-                )
-            }
-
-        input.nextCharacter == ']' -> IndexedValue(
-            index = input.index + 2,
-            value = RecursiveList.NestedList(emptyList()),
-        )
-
-        else -> generateSequence(
-            IndexedValue(
-                input.index,
-                emptyList<RecursiveList<T>>(),
-            )
-        ) { (currentParsingIndex, currentList) ->
-            if (input.value[currentParsingIndex] == ']') null
-            else {
-                val (nextIndex, nextElement) = parseRecursiveListInternal(
-                    IndexedValue(
-                        currentParsingIndex + 1,
-                        input.value
-                    ),
-                    elementParsing
-                )
-                IndexedValue(nextIndex, currentList + nextElement)
-            }
-        }
-            .last()
-            .let { (lastIndex, content) ->
-                IndexedValue(
-                    index = lastIndex + 1,
-                    value = RecursiveList.NestedList(content),
-                )
-            }
-    }
+    elementParsing: (JsonElement) -> T,
+): RecursiveList<T> {
+    return Gson().fromJson(input, JsonArray::class.java).toRecursiveList(elementParsing)
 }
 
-private val IndexedValue<String>.currentCharacter
-    get() = value[index]
-private val IndexedValue<String>.nextCharacter
-    get() = value[index + 1]
+private fun <T> JsonElement.toRecursiveList(transform: (JsonElement) -> T): RecursiveList<T> {
+    return if (this is JsonArray) RecursiveList.NestedList(map { it.toRecursiveList(transform) })
+    else RecursiveList.Element(transform(this))
+}
 
 sealed interface RecursiveList<T> {
     data class Element<T>(val value: T) : RecursiveList<T>

@@ -1,5 +1,6 @@
 package day13
 
+import com.google.gson.JsonElement
 import io.kotest.matchers.shouldBe
 import utils.RecursiveList
 import utils.parseRecursiveList
@@ -25,8 +26,8 @@ fun main() {
         }
         .let(::println)
 
-    val firstDecoderKey = parseRecursiveList("[[2]]", elementParsing = String::toInt)
-    val secondDecoderKey = parseRecursiveList("[[6]]", elementParsing = String::toInt)
+    val firstDecoderKey = parseRecursiveList("[[2]]", elementParsing = JsonElement::getAsInt)
+    val secondDecoderKey = parseRecursiveList("[[6]]", elementParsing = JsonElement::getAsInt)
 
     testInput.sortedWith(packetOrderComparator)
         .let { packets ->
@@ -53,7 +54,7 @@ fun main() {
 private fun List<String>.packetSequence(): Sequence<RecursiveList<Int>> {
     return asSequence()
         .filter(String::isNotBlank)
-        .map { parseRecursiveList(it, elementParsing = String::toInt) }
+        .map { parseRecursiveList(it, elementParsing = JsonElement::getAsInt) }
 }
 
 private operator fun RecursiveList<Int>.compareTo(other: RecursiveList<Int>): Int {
