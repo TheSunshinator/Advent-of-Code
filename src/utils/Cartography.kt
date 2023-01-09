@@ -1,6 +1,7 @@
 package utils
 
 import arrow.optics.optics
+import kotlin.math.sign
 
 @optics
 data class Point(val x: Int, val y: Int) {
@@ -41,4 +42,17 @@ data class MapDetails<T>(
 fun <T> List<List<T>>.detailsAt(position: Point) = MapDetails(position, this[position])
 fun <T> List<List<T>>.detailsSequence(): Sequence<MapDetails<T>> {
     return coordinates().map { MapDetails(it, this[it]) }
+}
+
+infix fun Point.sequenceTo(other: Point): Sequence<Point> {
+    return when {
+        x == other.x -> if (y == other.y) sequenceOf(this)
+        else IntProgression.fromClosedRange(y, other.y, step = (other.y - y).sign)
+            .asSequence()
+            .map { Point(x, it) }
+        y == other.y -> IntProgression.fromClosedRange(x, other.x, step = (other.x - x).sign)
+            .asSequence()
+            .map { Point(it, y) }
+        else -> throw UnsupportedOperationException("Only horizontal lines are supported")
+    }
 }

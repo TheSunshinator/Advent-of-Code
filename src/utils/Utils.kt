@@ -25,3 +25,5 @@ fun <T> List<List<T>>.coordinates() = indices.asSequence().flatMap { i -> this[i
 infix fun IntRange.cartesianProduct(other: IntRange) = asSequence().flatMap { i -> other.map { j -> Point(i, j) } }
 
 fun Int.plusOrMinus1() = minus(1)..plus(1)
+
+operator fun <T> (T.() -> Boolean).not(): T.() -> Boolean = { !this@not() }
