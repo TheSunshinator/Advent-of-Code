@@ -1,6 +1,7 @@
 package utils
 
 import arrow.optics.optics
+import kotlin.math.abs
 import kotlin.math.sign
 
 @optics
@@ -56,3 +57,5 @@ infix fun Point.sequenceTo(other: Point): Sequence<Point> {
         else -> throw UnsupportedOperationException("Only horizontal lines are supported")
     }
 }
+
+infix fun Point.manhattanDistanceTo(other: Point): Int = abs(other.x - x) + abs(other.y - y)

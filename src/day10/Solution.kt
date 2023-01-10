@@ -1,7 +1,7 @@
 package day10
 
 import io.kotest.matchers.shouldBe
-import utils.plusOrMinus1
+import utils.plusOrMinus
 import utils.readInput
 
 fun main() {
@@ -82,6 +82,6 @@ private fun computeRegisterHistory(registerHistory: MutableList<Register>, instr
 
 private fun cycleConsoleLine(cycle: List<Register>): String {
     return cycle.joinToString(separator = "") {
-        if ((it.cycle - 1) % 40 in it.valueDuringCycle.plusOrMinus1()) "█" else " "
+        if ((it.cycle - 1) % 40 in it.valueDuringCycle.plusOrMinus(1)) "█" else " "
     }
 }

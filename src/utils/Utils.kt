@@ -24,6 +24,9 @@ fun parseLongSequence(input: List<String>) = input.first().splitToSequence(",").
 fun <T> List<List<T>>.coordinates() = indices.asSequence().flatMap { i -> this[i].indices.map { j -> Point(i, j) } }
 infix fun IntRange.cartesianProduct(other: IntRange) = asSequence().flatMap { i -> other.map { j -> Point(i, j) } }
 
-fun Int.plusOrMinus1() = minus(1)..plus(1)
+infix fun Int.plusOrMinus(n: Int) = minus(n)..plus(n)
 
 operator fun <T> (T.() -> Boolean).not(): T.() -> Boolean = { !this@not() }
+
+val IntRange.size
+    get() = (last - first) / step
