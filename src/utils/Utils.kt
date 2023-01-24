@@ -23,6 +23,8 @@ fun parseLongSequence(input: List<String>) = input.first().splitToSequence(",").
 
 fun <T> List<List<T>>.coordinates() = indices.asSequence().flatMap { i -> this[i].indices.map { j -> Point(i, j) } }
 infix fun IntRange.cartesianProduct(other: IntRange) = asSequence().flatMap { i -> other.map { j -> Point(i, j) } }
+infix fun <T, R> Iterable<T>.cartesianProduct(other: Iterable<R>) = asSequence().flatMap { i -> other.map { j -> i to j } }
+infix fun <T, R> Sequence<T>.cartesianProduct(other: Sequence<R>) = flatMap { i -> other.map { j -> i to j } }
 
 infix fun Int.plusOrMinus(n: Int) = minus(n)..plus(n)
 
@@ -30,3 +32,25 @@ operator fun <T> (T.() -> Boolean).not(): T.() -> Boolean = { !this@not() }
 
 val IntRange.size
     get() = (last - first) / step
+
+fun <T> Collection<T>.combinations(size: Int): Sequence<Set<T>> {
+    return if (size == 1) asSequence().map(::setOf)
+    else asSequence()
+        .runningFold(toSet(), Set<T>::minus)
+        .drop(1)
+        .zip(asSequence()) { toCombine, current -> current to toCombine }
+        .flatMap { (current, toCombine) ->
+            toCombine.combinations(size - 1)
+                .map { it + current }
+        }
+}
+
+fun <T> Collection<T>.permutations(size: Int): Sequence<List<T>> {
+    return if (size == 1) asSequence().map(::listOf)
+    else asSequence()
+        .map { it to this - it }
+        .flatMap { (current, toPermute) ->
+            toPermute.permutations(size - 1)
+                .map { it + current }
+        }
+}
