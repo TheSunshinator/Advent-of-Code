@@ -7,6 +7,7 @@ import arrow.optics.optics
 import io.kotest.matchers.shouldBe
 import kotlin.math.sign
 import utils.Point
+import utils.neighbors
 import utils.readInput
 import utils.x
 import utils.y

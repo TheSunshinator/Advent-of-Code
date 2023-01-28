@@ -1,5 +1,6 @@
 package utils
 
+import arrow.optics.copy
 import arrow.optics.optics
 import kotlin.math.abs
 import kotlin.math.sign
@@ -8,22 +9,40 @@ import kotlin.math.sign
 data class Point(val x: Int, val y: Int) {
 
     constructor(): this(0, 0)
-    fun neighbors(
-        includeThis: Boolean = false,
-        includeDiagonal: Boolean = false,
-    ) = sequence {
-        if (includeDiagonal) yield(Point(x - 1, y - 1))
-        yield(Point(x, y - 1))
-        if (includeDiagonal) yield(Point(x + 1, y - 1))
-        yield(Point(x - 1, y))
-        if (includeThis) yield(this@Point)
-        yield(Point(x + 1, y))
-        if (includeDiagonal) yield(Point(x - 1, y + 1))
-        yield(Point(x, y + 1))
-        if (includeDiagonal) yield(Point(x + 1, y + 1))
-    }
 
     companion object
+}
+
+sealed interface Direction {
+    sealed interface Horizontal: Direction
+    sealed interface Vertical: Direction
+
+    object Up: Vertical
+    object Down: Vertical
+    object Left: Horizontal
+    object Right: Horizontal
+}
+
+fun Point.neighbors(
+    includeThis: Boolean = false,
+    includeDiagonal: Boolean = false,
+): Sequence<Point> = sequence {
+    if (includeDiagonal) yield(Point(x - 1, y - 1))
+    yield(Point(x, y - 1))
+    if (includeDiagonal) yield(Point(x + 1, y - 1))
+    yield(Point(x - 1, y))
+    if (includeThis) yield(this@neighbors)
+    yield(Point(x + 1, y))
+    if (includeDiagonal) yield(Point(x - 1, y + 1))
+    yield(Point(x, y + 1))
+    if (includeDiagonal) yield(Point(x + 1, y + 1))
+}
+
+infix fun Point.move(direction: Direction) = when (direction) {
+    Direction.Left -> copy { Point.x transform Int::dec }
+    Direction.Right -> copy { Point.x transform Int::inc }
+    Direction.Down -> copy { Point.y transform Int::inc }
+    Direction.Up -> copy { Point.y transform Int::dec }
 }
 
 operator fun <T> List<List<T>>.get(p: Point) = this[p.x][p.y]
@@ -59,3 +78,25 @@ infix fun Point.sequenceTo(other: Point): Sequence<Point> {
 }
 
 infix fun Point.manhattanDistanceTo(other: Point): Int = abs(other.x - x) + abs(other.y - y)
+
+fun Set<Point>.print() {
+    if (isEmpty()) {
+        println("Set is empty")
+        return
+    }
+
+    val ys = groupBy { it.y }
+    val xRange = minMaxOf { it.x }?.let { it.first..it.second } ?: return
+    ys.keys.minMax()
+        ?.let { it.first..it.second }
+        ?.asSequence()
+        ?.map { y ->
+            xRange.map { Point(it, y) }
+        }
+        ?.forEach { row ->
+            row.forEach { point ->
+                print(if (point in this) "█" else "_")
+            }
+            println()
+        }
+}
