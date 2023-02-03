@@ -7,20 +7,19 @@ import kotlin.math.sign
 
 @optics
 data class Point(val x: Int, val y: Int) {
-
-    constructor(): this(0, 0)
+    constructor() : this(0, 0)
 
     companion object
 }
 
 sealed interface Direction {
-    sealed interface Horizontal: Direction
-    sealed interface Vertical: Direction
+    sealed interface Horizontal : Direction
+    sealed interface Vertical : Direction
 
-    object Up: Vertical
-    object Down: Vertical
-    object Left: Horizontal
-    object Right: Horizontal
+    object Up : Vertical
+    object Down : Vertical
+    object Left : Horizontal
+    object Right : Horizontal
 }
 
 fun Point.neighbors(
@@ -49,7 +48,8 @@ operator fun <T> List<List<T>>.get(p: Point) = this[p.x][p.y]
 operator fun <T> List<MutableList<T>>.set(p: Point, value: T) {
     this[p.x][p.y] = value
 }
-fun <T> List<List<T>>.getOrElse(p: Point, defaultValue: (Point) -> T) : T {
+
+fun <T> List<List<T>>.getOrElse(p: Point, defaultValue: (Point) -> T): T {
     return if (p.x in indices && p.y in this[p.x].indices) this[p]
     else defaultValue(p)
 }
@@ -70,9 +70,11 @@ infix fun Point.sequenceTo(other: Point): Sequence<Point> {
         else IntProgression.fromClosedRange(y, other.y, step = (other.y - y).sign)
             .asSequence()
             .map { Point(x, it) }
+
         y == other.y -> IntProgression.fromClosedRange(x, other.x, step = (other.x - x).sign)
             .asSequence()
             .map { Point(it, y) }
+
         else -> throw UnsupportedOperationException("Only horizontal lines are supported")
     }
 }
@@ -84,10 +86,9 @@ fun Set<Point>.print() {
         println("Set is empty")
         return
     }
-
     val ys = groupBy { it.y }
-    val xRange = minMaxOf { it.x }?.let { it.first..it.second } ?: return
-    ys.keys.minMax()
+    val xRange = minMaxOfOrNull { it.x }?.let { it.first..it.second } ?: return
+    ys.keys.minMaxOrNull()
         ?.let { it.first..it.second }
         ?.asSequence()
         ?.map { y ->
@@ -97,6 +98,62 @@ fun Set<Point>.print() {
             row.forEach { point ->
                 print(if (point in this) "█" else "_")
             }
+            println()
+        }
+}
+
+@optics
+data class Point3d(val x: Int = 0, val y: Int = 0, val z: Int = 0) {
+    companion object
+}
+
+infix fun Point3d.manhattanDistanceTo(other: Point3d): Int = abs(other.x - x) + abs(other.y - y) + abs(other.z - z)
+
+fun Point3d.neighbors(
+    includeThis: Boolean = false,
+    includeDiagonal: Boolean = false,
+): Sequence<Point3d> {
+    return sequenceOf(
+        Point3d.x,
+        Point3d.y,
+        Point3d.z,
+    )
+        .mapTo(mutableListOf()) { lens ->
+            sequenceOf(-1, 0, 1)
+                .map { increment -> lens.lift { it + increment } }
+        }
+        .let { (xModifications, yModifications, zModifications) ->
+            xModifications cartesianProduct yModifications cartesianProduct zModifications
+        }
+        .map { (otherModifications, modifyZ) ->
+            val (modifyX, modifyY) = otherModifications
+            modifyX(this)
+                .let(modifyY)
+                .let(modifyZ)
+        }
+        .let { neighborSequence ->
+            if (includeThis) neighborSequence else neighborSequence.filterNot { it == this }
+        }
+        .let { neighborSequence ->
+            if (includeDiagonal) neighborSequence else neighborSequence.filter { it manhattanDistanceTo this < 2 }
+        }
+}
+
+fun Set<Point3d>.print3d() {
+    if (isEmpty()) {
+        println("Set is empty")
+        return
+    }
+    val zs = groupBy { it.z }
+    val xRange = minMaxOfOrNull { it.x }?.let { it.first..it.second } ?: return
+    val yRange = minMaxOfOrNull { it.y }?.let { it.first..it.second } ?: return
+    val plane = xRange cartesianProduct yRange
+    zs.keys.minMaxOrNull()
+        ?.let { it.first..it.second }
+        ?.asSequence()
+        ?.map { plane.filterTo(mutableSetOf()) { (x, y) -> Point3d(x, y, it) in this } }
+        ?.forEach { zPlane ->
+            zPlane.print()
             println()
         }
 }

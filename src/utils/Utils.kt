@@ -47,6 +47,17 @@ fun <T> Collection<T>.combinations(size: Int): Sequence<Set<T>> {
         }
 }
 
+fun <T> Sequence<T>.combinations(size: Int): Sequence<Set<T>> {
+    return if (size == 1) map(::setOf)
+    else runningFold(toSet(), Set<T>::minus)
+        .drop(1)
+        .zip(asSequence()) { toCombine, current -> current to toCombine }
+        .flatMap { (current, toCombine) ->
+            toCombine.combinations(size - 1)
+                .map { it + current }
+        }
+}
+
 fun <T> Collection<T>.permutations(size: Int): Sequence<List<T>> {
     return if (size == 1) asSequence().map(::listOf)
     else asSequence()
@@ -81,7 +92,7 @@ fun leastCommonMultiple(a: Int, vararg values: Int): Int = when (values.size) {
     )
 }
 
-fun <T : Comparable<T>> Iterable<T>.minMax(): Pair<T, T>? {
+fun <T : Comparable<T>> Iterable<T>.minMaxOrNull(): Pair<T, T>? {
     val iterator = iterator()
     return if (iterator.hasNext()) iterator.asSequence().fold(iterator.next().let { it to it }) { (min, max), value ->
         if (value < min) value else {
@@ -90,7 +101,9 @@ fun <T : Comparable<T>> Iterable<T>.minMax(): Pair<T, T>? {
     } else null
 }
 
-fun <T, R : Comparable<R>> Iterable<T>.minMaxOf(selector: (T) -> R): Pair<R, R>? {
+fun <T : Comparable<T>> Iterable<T>.minMax(): Pair<T, T> = minMaxOrNull()!!
+
+fun <T, R : Comparable<R>> Iterable<T>.minMaxOfOrNull(selector: (T) -> R): Pair<R, R>? {
     val iterator = iterator()
     return if (iterator.hasNext()) iterator.asSequence()
         .map(selector)
@@ -99,3 +112,5 @@ fun <T, R : Comparable<R>> Iterable<T>.minMaxOf(selector: (T) -> R): Pair<R, R>?
         }
     else null
 }
+
+fun <T, R : Comparable<R>> Iterable<T>.minMaxOf(selector: (T) -> R): Pair<R, R> = minMaxOfOrNull(selector)!!
