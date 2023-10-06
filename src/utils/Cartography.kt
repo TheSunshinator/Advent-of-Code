@@ -16,10 +16,39 @@ sealed interface Direction {
     sealed interface Horizontal : Direction
     sealed interface Vertical : Direction
 
-    object Up : Vertical
-    object Down : Vertical
-    object Left : Horizontal
-    object Right : Horizontal
+    fun rotateClockwise() = when (this) {
+        Left -> Up
+        Up -> Right
+        Right -> Down
+        Down -> Left
+    }
+
+    fun rotateAntiClockwise() = when (this) {
+        Left -> Down
+        Down -> Right
+        Right -> Up
+        Up -> Left
+    }
+
+    fun opposite() = when (this) {
+        Left -> Right
+        Down -> Up
+        Right -> Left
+        Up -> Down
+    }
+
+    object Up : Vertical {
+        override fun toString() = "Direction.Up"
+    }
+    object Down : Vertical {
+        override fun toString() = "Direction.Down"
+    }
+    object Left : Horizontal {
+        override fun toString() = "Direction.Left"
+    }
+    object Right : Horizontal {
+        override fun toString() = "Direction.Right"
+    }
 }
 
 fun Point.neighbors(
