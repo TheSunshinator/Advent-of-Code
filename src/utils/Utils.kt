@@ -1,5 +1,7 @@
 package utils
 
+import arrow.core.NonEmptyList
+import arrow.core.identity
 import java.io.File
 import java.math.BigInteger
 import java.security.MessageDigest
@@ -7,7 +9,34 @@ import java.security.MessageDigest
 /**
  * Reads lines from the given input txt file.
  */
-fun readInput(day: String, name: String): List<String> = File("src/day$day", "$name.txt").readLines()
+fun readInput(day: String, name: String, year: Int = 2022): List<String> {
+    return File("src/year$year/day$day", "$name.txt").readLines()
+}
+
+fun readInputs(
+    year: Int,
+    day: Int,
+    vararg otherTestFileNames: String,
+): Pair<List<String>, NonEmptyList<List<String>>> {
+    val formattedDay = String.format("%02d", day)
+    return File("src/year$year/day$formattedDay", "input.txt").readLines() to NonEmptyList(
+        head = File("src/year$year/day$formattedDay", "test_input.txt").readLines(),
+        tail = otherTestFileNames.asSequence()
+            .map { File("src/year$year/day$formattedDay", "test_input.txt") }
+            .map { it.readLines() }
+            .toList()
+    )
+}
+
+fun <T> readInputs(
+    year: Int,
+    day: Int,
+    vararg otherTestFileNames: String,
+    transform: (List<String>) -> T,
+): Pair<T, NonEmptyList<T>> {
+    val (realInput, testInputs) = readInputs(year, day, *otherTestFileNames)
+    return Pair(transform(realInput), testInputs.map(transform))
+}
 
 /**
  * Converts string to md5 hash.

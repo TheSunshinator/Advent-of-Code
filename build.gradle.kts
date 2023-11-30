@@ -1,19 +1,11 @@
 plugins {
-    kotlin("jvm") version "1.7.22"
-    id("com.google.devtools.ksp") version "1.7.22-1.0.8"
-}
-
-repositories {
-    mavenCentral()
+    kotlin("jvm") version "1.9.20"
+    id("com.google.devtools.ksp") version "1.9.20-1.0.14"
 }
 
 tasks {
     sourceSets.main {
         java.srcDirs("src")
-    }
-
-    wrapper {
-        gradleVersion = "7.5.1"
     }
 }
 
