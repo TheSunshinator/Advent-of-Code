@@ -22,7 +22,7 @@ fun readInputs(
     return File("src/year$year/day$formattedDay", "input.txt").readLines() to NonEmptyList(
         head = File("src/year$year/day$formattedDay", "test_input.txt").readLines(),
         tail = otherTestFileNames.asSequence()
-            .map { File("src/year$year/day$formattedDay", "test_input.txt") }
+            .map { File("src/year$year/day$formattedDay", "$it.txt") }
             .map { it.readLines() }
             .toList()
     )
