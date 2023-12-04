@@ -76,18 +76,18 @@ private fun part2(input: Input): Long {
         .sum()
 }
 
-data class Input(
+private data class Input(
     val numbers: List<Number>,
     val symbols: List<Symbol>,
 )
 
-data class Number(
+private data class Number(
     val row: Int,
     val columns: IntRange,
     val value: Long,
 )
 
-data class Symbol(
+private data class Symbol(
     val value: Char,
     val position: Point,
 )

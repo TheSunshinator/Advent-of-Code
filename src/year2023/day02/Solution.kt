@@ -65,8 +65,8 @@ private fun part2(input: List<Match>): Long {
         .sumOf { it.first * it.second * it.third }
 }
 
-data class Match(
+private data class Match(
     val number: Int,
     val games: List<GameResult>,
 )
-typealias GameResult = Map<String, Int>
+private typealias GameResult = Map<String, Int>

@@ -35,7 +35,8 @@ fun <T> readInputs(
     transform: (List<String>) -> T,
 ): Pair<T, NonEmptyList<T>> {
     val (realInput, testInputs) = readInputs(year, day, *otherTestFileNames)
-    return Pair(transform(realInput), testInputs.map(transform))
+    val mappedTestInputs = testInputs.map(transform)
+    return Pair(transform(realInput), mappedTestInputs)
 }
 
 /**
