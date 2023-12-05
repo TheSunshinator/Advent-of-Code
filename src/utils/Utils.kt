@@ -144,3 +144,11 @@ fun <T, R : Comparable<R>> Iterable<T>.minMaxOfOrNull(selector: (T) -> R): Pair<
 }
 
 fun <T, R : Comparable<R>> Iterable<T>.minMaxOf(selector: (T) -> R): Pair<R, R> = minMaxOfOrNull(selector)!!
+
+infix fun LongRange.intersect(other: LongRange): LongRange? = when {
+    other.first in this && other.last in this -> other
+    first in other && last in other -> this
+    first in other -> first..other.last
+    last in other -> other.first..last
+    else -> null
+}
