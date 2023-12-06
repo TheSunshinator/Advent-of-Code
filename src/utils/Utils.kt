@@ -152,3 +152,5 @@ infix fun LongRange.intersect(other: LongRange): LongRange? = when {
     last in other -> other.first..last
     else -> null
 }
+
+fun Sequence<Int>.product() = fold(1L) { product, value -> value * product }
