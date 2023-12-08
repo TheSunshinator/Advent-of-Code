@@ -154,3 +154,4 @@ infix fun LongRange.intersect(other: LongRange): LongRange? = when {
 }
 
 fun Sequence<Int>.product() = fold(1L) { product, value -> value * product }
+fun Sequence<*>.countLong() = fold(0L) { count, _ -> count + 1 }
