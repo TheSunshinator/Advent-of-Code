@@ -77,6 +77,7 @@ fun <T> Collection<T>.combinations(size: Int): Sequence<Set<T>> {
         }
 }
 
+// (a, b) == (b, a)
 fun <T> Sequence<T>.combinations(size: Int): Sequence<Set<T>> {
     return if (size == 1) map(::setOf)
     else runningFold(toSet(), Set<T>::minus)
