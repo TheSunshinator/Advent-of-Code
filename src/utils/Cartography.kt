@@ -74,6 +74,7 @@ infix fun Point.move(direction: Direction) = when (direction) {
 }
 
 operator fun <T> List<List<T>>.get(p: Point) = this[p.x][p.y]
+operator fun List<String>.get(p: Point) = this[p.y][p.x]
 operator fun <T> List<MutableList<T>>.set(p: Point, value: T) {
     this[p.x][p.y] = value
 }
