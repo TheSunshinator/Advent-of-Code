@@ -1,7 +1,6 @@
 package utils
 
 import arrow.core.NonEmptyList
-import arrow.core.identity
 import java.io.File
 import java.math.BigInteger
 import java.security.MessageDigest
@@ -156,3 +155,7 @@ infix fun LongRange.intersect(other: LongRange): LongRange? = when {
 
 fun Sequence<Int>.product() = fold(1L) { product, value -> value * product }
 fun Sequence<*>.countLong() = fold(0L) { count, _ -> count + 1 }
+
+fun Regex.findAllWithOverlap(input: String): Sequence<MatchResult> = generateSequence(find(input)) { previousMatch ->
+    find(input, startIndex = previousMatch.range.first + 1)
+}

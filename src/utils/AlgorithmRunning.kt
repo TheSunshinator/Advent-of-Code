@@ -42,6 +42,9 @@ private fun <I, R> runAlgorithm(
             }
         }
     }
+
+    println("Tests are successful")
+
     val (result, executionTime) = measureTimedValue { algorithm(realInput) }
 
     println("Result is $result. Found in $executionTime")
