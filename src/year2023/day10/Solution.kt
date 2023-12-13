@@ -2,34 +2,42 @@ package year2023.day10
 
 import arrow.core.nonEmptyListOf
 import io.kotest.matchers.collections.shouldHaveSize
-import java.util.LinkedList
 import utils.Point
 import utils.ProblemPart
 import utils.get
 import utils.neighbors
+import utils.print
 import utils.readInputs
 import utils.runAlgorithm
 import utils.x
 import utils.y
 
 fun main() {
-    val (realInput, testInputs) = readInputs(2023, 10)
+    val (realInput, testInputs) = readInputs(
+        2023,
+        10,
+        "test_input_2",
+        "test_input_3",
+        "test_input_4",
+    )
 
     runAlgorithm(
         realInput = realInput,
         testInputs = testInputs,
         part1 = ProblemPart(
-            expectedResultsForTests = nonEmptyListOf(8),
+            expectedResultsForTests = nonEmptyListOf(8, 22, 70, 80),
             algorithm = ::part1,
         ),
-//        part2 = ProblemPart(
-//            expectedResultsForTests = nonEmptyListOf(TODO()),
-//            algorithm = { TODO() },
-//        ),
+        part2 = ProblemPart(
+            expectedResultsForTests = nonEmptyListOf(1, 4, 8, 10),
+            algorithm = ::part2,
+        ),
     )
 }
 
-private fun part1(input: List<String>): Int {
+private fun part1(input: List<String>): Int = computeLoop(input).size / 2
+
+private fun computeLoop(input: List<String>): List<Point> {
     val start = input.asSequence()
         .mapIndexedNotNull { y, row ->
             row.asSequence()
@@ -54,7 +62,7 @@ private fun part1(input: List<String>): Int {
         }
         .last()
         .let { (path1, path2) ->
-            if (path1.last() == path2.last()) path1.size - 1 else path1.size - 2
+            path1 + path2.asReversed().asSequence().drop(if (path1.last() == path2.last()) 1 else 2)
         }
 }
 
@@ -79,3 +87,51 @@ private fun computeNextStepFunction(input: List<String>): (MutableList<Point>) -
 
     path.apply { add(newElement) }
 }
+
+private fun part2(input: List<String>): Int {
+    val loop = computeLoop(input).toSet()
+
+    val standardMap = input.mapIndexed { y, line ->
+        line.asSequence()
+            .mapIndexed { x, char ->
+                when {
+                    Point(x, y) !in loop -> '.'
+                    char == 'S' -> when {
+                        Point(x, y + 1) in loop && Point(x, y - 1) in loop -> '|'
+                        Point(x, y + 1) in loop && Point(x + 1, y) in loop -> 'F'
+                        Point(x, y + 1) in loop && Point(x - 1, y) in loop -> '7'
+                        Point(x, y - 1) in loop && Point(x + 1, y) in loop -> 'L'
+                        Point(x, y - 1) in loop && Point(x - 1, y) in loop -> 'J'
+                        else -> '-'
+                    }
+                    else -> char
+                }
+            }
+            .joinToString(separator = "")
+    }
+
+    val horizontalInterior = standardMap.asSequence()
+        .findInnerPoints(wrappedHorizontalZones)
+        .toSet()
+
+    val verticalInterior = standardMap.first().indices.asSequence()
+        .map { column -> standardMap.asSequence().map { it[column] }.joinToString(separator = "") }
+        .findInnerPoints(wrappedVerticalZones)
+        .map { Point(it.y, it.x) }
+        .toSet()
+
+    return horizontalInterior.intersect(verticalInterior).size
+}
+
+private fun Sequence<String>.findInnerPoints(insideRegex: Regex): Sequence<Point> = flatMapIndexed { y, line ->
+    insideRegex.findAll(line)
+        .filterIndexed { index, _ -> index % 2 == 0 }
+        .flatMap { match ->
+            val space = match.groups[1]!!
+            space.range.asSequence().mapNotNull { x -> if (line[x] == '.') x else null }
+        }
+        .map { x -> Point(x, y) }
+}
+
+private val wrappedHorizontalZones = "(?:\\||F-*J|L-*7)(.*?)(?=\\||F-*J|L-*7)".toRegex()
+private val wrappedVerticalZones = "(?:-|7\\|*L|F\\|*J)(.*?)(?=-|7\\|*L|F\\|*J)".toRegex()
