@@ -159,3 +159,11 @@ fun Sequence<*>.countLong() = fold(0L) { count, _ -> count + 1 }
 fun Regex.findAllWithOverlap(input: String): Sequence<MatchResult> = generateSequence(find(input)) { previousMatch ->
     find(input, startIndex = previousMatch.range.first + 1)
 }
+
+fun List<String>.transpose(): List<String> {
+    return first().indices.asSequence()
+        .map { columnIndex ->
+            joinToString(separator = "") { it[columnIndex].toString() }
+        }
+        .toList()
+}
