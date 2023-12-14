@@ -104,22 +104,30 @@ fun <T> Sequence<T>.continuing() = object : Sequence<T> {
     override fun iterator() = continuingIterator
 }
 
-fun greaterCommonDivisor(a: Int, vararg values: Int): Int = when (values.size) {
+fun greaterCommonDivisor(a: Long, vararg values: Long): Long = when (values.size) {
     0 -> a
-    1 -> values.single().let { b -> greaterCommonDivisor(b, a % b) }
+    1 -> {
+        val b = values.single()
+        if (b == 0L) a else greaterCommonDivisor(b, a % b)
+    }
     else -> greaterCommonDivisor(
         greaterCommonDivisor(a, values.first()),
-        *IntArray(values.size - 1) { values[it + 1] }
+        *LongArray(values.size - 1) { values[it + 1] }
     )
 }
 
-fun leastCommonMultiple(a: Int, vararg values: Int): Int = when (values.size) {
+fun leastCommonMultiple(a: Long, vararg values: Long): Long = when (values.size) {
     0 -> a
     1 -> values.single().let { b -> a * b / greaterCommonDivisor(a, b) }
     else -> leastCommonMultiple(
         leastCommonMultiple(a, values.first()),
-        *IntArray(values.size - 1) { values[it + 1] }
+        *LongArray(values.size - 1) { values[it + 1] }
     )
+}
+
+fun <T> Sequence<T>.leastCommonMultipleOf(selector: (T) -> Long): Long {
+    return if (none()) throw IllegalArgumentException("Sequence is empty")
+    else map(selector).reduce { a, b -> a * b / greaterCommonDivisor(a, b) }
 }
 
 fun <T : Comparable<T>> Iterable<T>.minMaxOrNull(): Pair<T, T>? {
