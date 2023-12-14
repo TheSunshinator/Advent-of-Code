@@ -175,3 +175,8 @@ fun List<String>.transpose(): List<String> {
         }
         .toList()
 }
+
+fun List<String>.print() {
+    forEach { println(it) }
+    println()
+}
