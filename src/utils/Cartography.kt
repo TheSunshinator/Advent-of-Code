@@ -40,12 +40,15 @@ sealed interface Direction {
     object Up : Vertical {
         override fun toString() = "Direction.Up"
     }
+
     object Down : Vertical {
         override fun toString() = "Direction.Down"
     }
+
     object Left : Horizontal {
         override fun toString() = "Direction.Left"
     }
+
     object Right : Horizontal {
         override fun toString() = "Direction.Right"
     }
@@ -186,4 +189,20 @@ fun Set<Point3d>.print3d() {
             zPlane.print()
             println()
         }
+}
+
+// Counts number of points inside a loop
+fun List<Point>.applyShoelaceTheorem(): Long {
+    check(first() == last()) { "Shoelace theorem must be applied on a loop" }
+    val xSequence = asSequence().map { it.x.toLong() }
+    val ySequence = asSequence().map { it.y.toLong() }
+    return (
+        xSequence.zip(ySequence.drop(1), Long::times).sum() - ySequence.zip(xSequence.drop(1), Long::times).sum()
+    ) / 2
+}
+
+// Compute area defined by loop, including points in this
+fun List<Point>.applyPickTheorem(): Long {
+    check(first() == last()) { "Shoelace theorem must be applied on a loop" }
+    return applyShoelaceTheorem() + (size - 1) / 2 + 1
 }
