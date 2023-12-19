@@ -63,6 +63,8 @@ operator fun <T> (T.() -> Boolean).not(): T.() -> Boolean = { !this@not() }
 
 val IntRange.size
     get() = (last - first) / step
+val LongRange.size
+    get() = if (isEmpty()) 0 else (last - first + 1) / step
 
 fun <T> Collection<T>.combinations(size: Int): Sequence<Set<T>> {
     return if (size == 1) asSequence().map(::setOf)
